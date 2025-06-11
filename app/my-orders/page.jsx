@@ -1,11 +1,11 @@
 'use client';
-import React, { useEffect, useState } from "react";
-import { assets, orderDummyData } from "@/assets/assets";
-import Image from "next/image";
-import { useAppContext } from "@/context/AppContext";
-import Footer from "@/components/Footer";
-import Navbar from "@/components/Navbar";
-import Loading from "@/components/Loading";
+import React, { useEffect, useState } from 'react';
+import { assets, orderDummyData } from '@/assets/assets';
+import Image from 'next/image';
+import { useAppContext } from '@/context/AppContext';
+import Footer from '@/components/Footer';
+import Navbar from '@/components/Navbar';
+import Loading from '@/components/Loading';
 
 const MyOrders = () => {
 
@@ -15,9 +15,9 @@ const MyOrders = () => {
     const [loading, setLoading] = useState(true);
 
     const fetchOrders = async () => {
-        setOrders(orderDummyData)
+        setOrders(orderDummyData);
         setLoading(false);
-    }
+    };
 
     useEffect(() => {
         fetchOrders();
@@ -40,7 +40,7 @@ const MyOrders = () => {
                                     />
                                     <p className="flex flex-col gap-3">
                                         <span className="font-medium text-base">
-                                            {order.items.map((item) => item.product.name + ` x ${item.quantity}`).join(", ")}
+                                            {order.items.map((item) => item.product.name + ` x ${item.quantity}`).join(', ')}
                                         </span>
                                         <span>Items : {order.items.length}</span>
                                     </p>
