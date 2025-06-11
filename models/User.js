@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema({
     _id: {type: String, required: true},
@@ -6,7 +6,7 @@ const userSchema = new mongoose.Schema({
     email: { type: String, required: true, unique: true },
     imageUrl: { type: String, required: true },
     cartItems: { type: Object, default: {} },
-}, { minimize: false })
+}, { minimize: false });
 
 const User = mongoose.models.user || mongoose.model('user', userSchema);
 
