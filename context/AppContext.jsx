@@ -26,7 +26,19 @@ export const AppContextProvider = (props) => {
     const [cartItems, setCartItems] = useState({});
 
     const fetchProductData = async () => {
-        setProducts(productsDummyData);
+        try {
+            const { data } = await axios.get('/api/product/list');
+
+            if (data.success) {
+                setProducts(data.products);
+            } else {
+                toast.error(data.message);
+                console.error('Error fetching products:', data.message);
+            }
+        } catch (error) {
+            toast.error(error.message);
+            console.error('Error fetching products:', error);
+        }
     };
 
     const fetchUserData = async () => {
@@ -52,28 +64,61 @@ export const AppContextProvider = (props) => {
     };
 
     const addToCart = async (itemId) => {
-
+        const MAX_CART_ITEMS = 10;
         let cartData = structuredClone(cartItems);
-        if (cartData[itemId]) {
-            cartData[itemId] += 1;
-        }
-        else {
-            cartData[itemId] = 1;
-        }
-        setCartItems(cartData);
 
+        if (cartData[itemId]) {
+            if (cartData[itemId] >= MAX_CART_ITEMS) {
+                toast.error(`You can only add up to ${MAX_CART_ITEMS} of this item.`);
+                return;
+            }
+            cartData[itemId] += 1;
+        } else {
+            cartData[itemId] = 1;
+            toast.success('Item added to cart');
+        }
+
+        setCartItems(cartData);
+        if (user) {
+            try {
+                const token = await getToken();
+                await axios.post('/api/cart/update', { cartData }, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+            } catch (error) {
+                console.error('Error updating cart:', error.message);
+                toast.error('Failed to update cart. Please try again.');
+            }
+        }
     };
 
     const updateCartQuantity = async (itemId, quantity) => {
-
         let cartData = structuredClone(cartItems);
-        if (quantity === 0) {
+
+        if (quantity < 0) {
             delete cartData[itemId];
+            toast.success('Item removed from cart');
+        }
+
+        else if (quantity === 0) {
+            cartData[itemId] = 1;
         } else {
             cartData[itemId] = quantity;
         }
+
         setCartItems(cartData);
 
+        if (user) {
+            try {
+                const token = await getToken();
+                await axios.post('/api/cart/update', { cartData }, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+            } catch (error) {
+                console.error('Error updating cart:', error.message);
+                toast.error('Failed to update cart. Please try again.');
+            }
+        }
     };
 
     const getCartCount = () => {
