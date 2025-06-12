@@ -1,10 +1,10 @@
-'use client'
-import React from "react";
-import { assets } from "@/assets/assets";
-import OrderSummary from "@/components/OrderSummary";
-import Image from "next/image";
-import Navbar from "@/components/Navbar";
-import { useAppContext } from "@/context/AppContext";
+'use client';
+import React from 'react';
+import { assets } from '@/assets/assets';
+import OrderSummary from '@/components/OrderSummary';
+import Image from 'next/image';
+import Navbar from '@/components/Navbar';
+import { useAppContext } from '@/context/AppContext';
 
 const Cart = () => {
 
@@ -51,7 +51,7 @@ const Cart = () => {
                         <div>
                           <div className="rounded-lg overflow-hidden bg-gray-500/10 p-2">
                             <Image
-                              src={product.image[0]}
+                              src={product.images[0]}
                               alt={product.name}
                               className="w-16 h-auto object-cover mix-blend-multiply"
                               width={1280}
@@ -60,7 +60,7 @@ const Cart = () => {
                           </div>
                           <button
                             className="md:hidden text-xs text-orange-600 mt-1"
-                            onClick={() => updateCartQuantity(product._id, 0)}
+                            onClick={() => updateCartQuantity(product._id, -1)}
                           >
                             Remove
                           </button>
@@ -69,7 +69,7 @@ const Cart = () => {
                           <p className="text-gray-800">{product.name}</p>
                           <button
                             className="text-xs text-orange-600 mt-1"
-                            onClick={() => updateCartQuantity(product._id, 0)}
+                            onClick={() => updateCartQuantity(product._id, -1)}
                           >
                             Remove
                           </button>
