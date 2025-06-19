@@ -5,22 +5,46 @@ import Image from 'next/image';
 import { useAppContext } from '@/context/AppContext';
 import Footer from '@/components/seller/Footer';
 import Loading from '@/components/Loading';
+import toast from 'react-hot-toast';
+import axios from 'axios';
 
 const Orders = () => {
 
-    const { currency } = useAppContext();
+    const { currency, getToken, user, router, isSeller } = useAppContext();
 
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
 
     const fetchSellerOrders = async () => {
-        setOrders(orderDummyData);
-        setLoading(false);
+        try {
+            const token = await getToken();
+
+            const { data } = await axios.get('/api/order/seller-orders', { headers: { Authorization: `Bearer ${token}` } });
+
+            if (data.success) {
+                setOrders(data.orders);
+                setLoading(false);
+            } else {
+                toast.error(data.message);
+                console.log('Error fetching orders:', data.message);
+            }
+        } catch (error) {
+            console.error('Error fetching orders:', error);
+            toast.error('Failed to fetch orders: ' + error.message);
+        }
     };
 
     useEffect(() => {
-        fetchSellerOrders();
-    }, []);
+        if (user && !isSeller) {
+            toast.error('You are not authorized to view this page.');
+            router.push('/');
+            return;
+        }
+
+        if (user) {
+            fetchSellerOrders();
+        }
+    }, [user, isSeller]);
 
     return (
         <div className="flex-1 h-screen overflow-scroll flex flex-col justify-between text-sm">
