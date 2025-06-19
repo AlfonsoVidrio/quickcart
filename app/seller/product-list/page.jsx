@@ -10,7 +10,7 @@ import toast from 'react-hot-toast';
 
 const ProductList = () => {
 
-  const { router, getToken, user } = useAppContext();
+  const { router, getToken, user, isSeller } = useAppContext();
 
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -18,29 +18,33 @@ const ProductList = () => {
   const fetchSellerProduct = async () => {
     try {
       const token = await getToken();
-      const { data } = await axios.get('/api/product/seller-list', {headers:{Authorization: `Bearer ${token}`}});
-      console.log('Fetched products:', data.products);
+      const { data } = await axios.get('/api/product/seller-list', { headers: { Authorization: `Bearer ${token}` } });
       if (data.success) {
         setProducts(data.products);
         setLoading(false);
       } else {
         toast.error(data.message);
         setLoading(false);
-        console.error('Error fetching products:', data.message);
       }
 
     } catch (error) {
-      toast.error('Failed to fetch products');
+      toast.error(error.message);
       console.error('Error fetching products:', error);
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (user) {
+    if (user && !isSeller) {
+      toast.error('You are not authorized to view this page.');
+      router.push('/');
+      return;
+    }
+
+    if (user && isSeller) {
       fetchSellerProduct();
     }
-  }, [user]);
+  }, [user, isSeller]);
 
   return (
     <div className="flex-1 min-h-screen flex flex-col justify-between">
