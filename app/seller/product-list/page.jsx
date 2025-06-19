@@ -20,7 +20,7 @@ const ProductList = () => {
       const token = await getToken();
       const { data } = await axios.get('/api/product/seller-list', { headers: { Authorization: `Bearer ${token}` } });
       if (data.success) {
-        setProducts(data.products);
+        setProducts(data.products.reverse());
         setLoading(false);
       } else {
         toast.error(data.message);
