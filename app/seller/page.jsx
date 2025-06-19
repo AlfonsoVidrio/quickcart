@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { assets } from '@/assets/assets';
 import Image from 'next/image';
 import { useAppContext } from '@/context/AppContext';
@@ -8,7 +8,7 @@ import axios from 'axios';
 
 const AddProduct = () => {
 
-  const { getToken } = useAppContext();
+  const { getToken, router, isSeller } = useAppContext();
 
   const [files, setFiles] = useState([]);
   const [name, setName] = useState('');
@@ -16,6 +16,13 @@ const AddProduct = () => {
   const [category, setCategory] = useState('Earphone');
   const [price, setPrice] = useState('');
   const [offerPrice, setOfferPrice] = useState('');
+
+  useEffect(() => {
+    if (!isSeller) {
+      toast.error('You are not authorized to view this page.');
+      router.push('/');
+    }
+  }, [isSeller]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -26,9 +33,16 @@ const AddProduct = () => {
     formData.append('price', price);
     formData.append('offerPrice', offerPrice);
 
-    for (let i = 0; i < files.length; i++) {
-      formData.append('images', files[i]);
+    const validFiles = files.filter(file => file !== null && file !== undefined);
+
+    if (validFiles.length === 0) {
+      toast.error('Please upload at least one image.');
+      return;
     }
+
+    validFiles.forEach((file, index) => {
+      formData.append('images', file);
+    });
 
     try {
       const token = await getToken();
@@ -44,7 +58,7 @@ const AddProduct = () => {
         setPrice('');
         setOfferPrice('');
       } else {
-        console.log('Error adding1 product:', data.message);
+        console.log('Error adding product:', data.message);
         toast.error(data.message);
       }
     } catch (error) {
@@ -166,7 +180,6 @@ const AddProduct = () => {
           ADD
         </button>
       </form>
-      {/* <Footer /> */}
     </div>
   );
 };
