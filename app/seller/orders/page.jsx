@@ -35,13 +35,14 @@ const Orders = () => {
     };
 
     useEffect(() => {
-        if (user && !isSeller) {
-            toast.error('You are not authorized to view this page.');
-            router.push('/');
-            return;
-        }
-
+        // Solo validar autorización si el usuario ya está cargado
         if (user) {
+            if (!isSeller) {
+                toast.error('You are not authorized to view this page.');
+                router.push('/');
+                return;
+            }
+            // Si llegamos aquí, el usuario está cargado y es vendedor
             fetchSellerOrders();
         }
     }, [user, isSeller]);
@@ -80,9 +81,10 @@ const Orders = () => {
                             <p className="font-medium my-auto">{currency}{order.amount}</p>
                             <div>
                                 <p className="flex flex-col">
-                                    <span>Method : COD</span>
+                                    <span>Method : {order.paymentType}</span>
                                     <span>Date : {new Date(order.date).toLocaleDateString()}</span>
-                                    <span>Payment : Pending</span>
+                                    <span>Payment : {order.isPaid ? 'Paid' : 'Pending'}</span>
+
                                 </p>
                             </div>
                         </div>
