@@ -28,7 +28,7 @@ const AddProduct = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (isLoading) return; // Prevenir múltiples envíos
+    if (isLoading) return;
     
     setIsLoading(true);
     
