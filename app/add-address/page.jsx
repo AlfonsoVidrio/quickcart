@@ -25,7 +25,7 @@ const AddAddress = () => {
     const onSubmitHandler = async (e) => {
         e.preventDefault();
         
-        if (isLoading) return; // Prevenir múltiples envíos
+        if (isLoading) return;
         
         setIsLoading(true);
         
@@ -35,7 +35,6 @@ const AddAddress = () => {
 
             if (data.success) {
                 toast.success(data.message);
-                // Limpiar el formulario después de guardar exitosamente
                 setAddress({
                     fullName: '',
                     phoneNumber: '',
@@ -71,13 +70,17 @@ const AddAddress = () => {
                             placeholder="Full name"
                             onChange={(e) => setAddress({ ...address, fullName: e.target.value })}
                             value={address.fullName}
+                            required
                         />
                         <input
                             className="px-2 py-2.5 focus:border-orange-500 transition border border-gray-500/30 rounded outline-none w-full text-gray-500"
-                            type="text"
+                            type="tel"
+                            pattern="[0-9+\-\s\(\)]+"
+                            title="Phone number should contain only digits, spaces, and special characters like +, -, ( )"
                             placeholder="Phone number"
                             onChange={(e) => setAddress({ ...address, phoneNumber: e.target.value })}
                             value={address.phoneNumber}
+                            required
                         />
                         <input
                             className="px-2 py-2.5 focus:border-orange-500 transition border border-gray-500/30 rounded outline-none w-full text-gray-500"
@@ -85,14 +88,15 @@ const AddAddress = () => {
                             placeholder="Postal code"
                             onChange={(e) => setAddress({ ...address, postalCode: e.target.value })}
                             value={address.postalCode}
+                            required
                         />
                         <textarea
                             className="px-2 py-2.5 focus:border-orange-500 transition border border-gray-500/30 rounded outline-none w-full text-gray-500 resize-none"
-                            type="text"
                             rows={4}
                             placeholder="Address (Neighborhood and Street)"
                             onChange={(e) => setAddress({ ...address, neighborhood: e.target.value })}
                             value={address.neighborhood}
+                            required
                         ></textarea>
                         <div className="flex space-x-3">
                             <input
@@ -101,6 +105,7 @@ const AddAddress = () => {
                                 placeholder="City/District/Town"
                                 onChange={(e) => setAddress({ ...address, city: e.target.value })}
                                 value={address.city}
+                                required
                             />
                             <input
                                 className="px-2 py-2.5 focus:border-orange-500 transition border border-gray-500/30 rounded outline-none w-full text-gray-500"
@@ -108,6 +113,7 @@ const AddAddress = () => {
                                 placeholder="State"
                                 onChange={(e) => setAddress({ ...address, state: e.target.value })}
                                 value={address.state}
+                                required
                             />
                         </div>
                     </div>
