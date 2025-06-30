@@ -1,4 +1,3 @@
-import { addressDummyData } from '@/assets/assets';
 import { useAppContext } from '@/context/AppContext';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
@@ -41,8 +40,8 @@ const OrderSummary = () => {
     
     try {
       
-      if (!selectedAddress) {
-        toast.error('Please select an address');
+      if (!selectedAddress || !selectedAddress._id) {
+        toast.error('Please select a valid address');
         return;
       }
 
@@ -83,12 +82,12 @@ const OrderSummary = () => {
   };
 
   const createOrderStripe = async () => {
-if (isLoading) return;
+    if (isLoading) return;
     
     try {
       
-      if (!selectedAddress) {
-        return toast.error('Please select an address');
+      if (!selectedAddress || !selectedAddress._id) {
+        return toast.error('Please select a valid address');
       }
 
       // Prepare cart items for order creation
@@ -117,10 +116,11 @@ if (isLoading) return;
         console.error('Error creating order:', data.message);
       }
 
-
     } catch (error) {
       toast.error('Failed to create order');
       console.error('Error creating order:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
