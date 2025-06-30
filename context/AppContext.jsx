@@ -73,6 +73,7 @@ export const AppContextProvider = (props) => {
                 return;
             }
             cartData[itemId] += 1;
+            toast.success(`Item added to cart (${cartData[itemId]})`);
         } else {
             cartData[itemId] = 1;
             toast.success('Item added to cart');
