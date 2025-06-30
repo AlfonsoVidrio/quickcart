@@ -9,6 +9,7 @@ const OrderSummary = () => {
   const { currency, router, getCartCount, getCartAmount, getToken, user, cartItems, setCartItems } = useAppContext();
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [userAddresses, setUserAddresses] = useState([]);
 
@@ -36,6 +37,8 @@ const OrderSummary = () => {
   };
 
   const createOrder = async () => {
+    if (isLoading) return; // Prevenir múltiples envíos
+    
     try {
       
       if (!selectedAddress) {
@@ -50,6 +53,8 @@ const OrderSummary = () => {
         toast.error('Your cart is empty');
         return;
       }
+
+      setIsLoading(true);
 
       const token = await getToken();
       const { data } = await axios.post('/api/order/create', {
@@ -71,6 +76,8 @@ const OrderSummary = () => {
     } catch (error) {
       toast.error('Failed to create order');
       console.error('Error creating order:', error);
+    } finally {
+      setIsLoading(false);
     }
 
   };
@@ -169,8 +176,16 @@ const OrderSummary = () => {
         </div>
       </div>
 
-      <button onClick={createOrder} className="w-full bg-orange-600 text-white py-3 mt-5 hover:bg-orange-700">
-        Place Order
+      <button 
+        onClick={createOrder} 
+        disabled={isLoading}
+        className={`w-full py-3 mt-5 text-white font-medium ${
+          isLoading 
+            ? 'bg-gray-400 cursor-not-allowed' 
+            : 'bg-orange-600 hover:bg-orange-700'
+        }`}
+      >
+        {isLoading ? 'Processing...' : 'Place Order'}
       </button>
     </div>
   );
