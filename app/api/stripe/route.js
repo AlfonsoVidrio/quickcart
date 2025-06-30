@@ -9,24 +9,42 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 export async function POST(request) {
     try {
         const body = await request.text();
+
         const sig = request.headers.get('stripe-signature');
 
         const event = stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET);
 
         const handlePaymentIntent = async (paymentIntentId, isPaid) => {
-            const session = await stripe.checkout.sessions.list({
-                payment_intent: paymentIntentId
-            });
+            try {
+                const sessions = await stripe.checkout.sessions.list({
+                    payment_intent: paymentIntentId
+                });
 
-            const { orderId, userId } = session.data[0].metadata;
+                if (!sessions.data || sessions.data.length === 0) {
+                    console.error('No session found for payment intent:', paymentIntentId);
+                    return;
+                }
 
-            await connectDB();
+                const session = sessions.data[0];
+                if (!session.metadata || !session.metadata.orderId || !session.metadata.userId) {
+                    console.error('Missing metadata in session:', session.id);
+                    return;
+                }
 
-            if (isPaid) {
-                await Order.findByIdAndUpdate(orderId, {isPaid: true});
-                await User.findByIdAndUpdate(userId, {cartItems: {}});
-            } else {
-                await Order.findByIdAndDelete(orderId);
+                const { orderId, userId } = session.metadata;
+
+                await connectDB();
+
+                if (isPaid) {
+                    await Order.findByIdAndUpdate(orderId, { isPaid: true });
+                    await User.findByIdAndUpdate(userId, { cartItems: {} });
+                    console.log(`Order ${orderId} marked as paid`);
+                } else {
+                    await Order.findByIdAndDelete(orderId);
+                    console.log(`Order ${orderId} deleted due to failed payment`);
+                }
+            } catch (error) {
+                console.error('Error handling payment intent:', error);
             }
         };
 
