@@ -20,15 +20,30 @@ const AddAddress = () => {
         city: '',
         state: '',
     });
+    const [isLoading, setIsLoading] = useState(false);
 
     const onSubmitHandler = async (e) => {
         e.preventDefault();
+        
+        if (isLoading) return; // Prevenir múltiples envíos
+        
+        setIsLoading(true);
+        
         try {
             const token = await getToken();
             const { data } = await axios.post('/api/user/add-address', { address }, { headers: { Authorization: `Bearer ${token}` } });
 
             if (data.success) {
                 toast.success(data.message);
+                // Limpiar el formulario después de guardar exitosamente
+                setAddress({
+                    fullName: '',
+                    phoneNumber: '',
+                    postalCode: '',
+                    neighborhood: '',
+                    city: '',
+                    state: '',
+                });
                 router.push('/cart');
             } else {
                 toast.error(data.message);
@@ -36,6 +51,8 @@ const AddAddress = () => {
         } catch (error) {
             console.error('Error adding address:', error);
             toast.error('Failed to add address');
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -94,8 +111,16 @@ const AddAddress = () => {
                             />
                         </div>
                     </div>
-                    <button type="submit" className="max-w-sm w-full mt-6 bg-orange-600 text-white py-3 hover:bg-orange-700 uppercase">
-                        Save address
+                    <button 
+                        type="submit" 
+                        disabled={isLoading}
+                        className={`max-w-sm w-full mt-6 py-3 uppercase text-white font-medium ${
+                            isLoading 
+                                ? 'bg-gray-400 cursor-not-allowed' 
+                                : 'bg-orange-600 hover:bg-orange-700'
+                        }`}
+                    >
+                        {isLoading ? 'SAVING...' : 'Save address'}
                     </button>
                 </form>
                 <Image
