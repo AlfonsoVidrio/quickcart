@@ -5,6 +5,14 @@ import { useAppContext } from '@/context/AppContext';
 const HomeProducts = () => {
 
   const { products, router } = useAppContext();
+  if (!products || products.length === 0) {
+    return (
+      <div className="flex flex-col items-center pt-14">
+        <p className="text-2xl font-medium text-left w-full">Popular products</p>
+        <p className="text-gray-500 mt-4">No products available at the moment.</p>
+      </div>
+    );
+  }
   const MAX_PRODUCTS = 10;
   return (
     <div className="flex flex-col items-center pt-14">
