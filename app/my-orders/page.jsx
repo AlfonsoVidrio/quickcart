@@ -21,7 +21,7 @@ const MyOrders = () => {
             const token = await getToken();
 
             const { data } = await axios.get('/api/order/list', { headers:{Authorization: `Bearer ${token}`} });
-            if (data.success) {
+            if (data.success && data) {
                 setOrders(data.orders.reverse());
                 setLoading(false);
             } else {
@@ -31,6 +31,7 @@ const MyOrders = () => {
 
             }
         } catch (error) {
+            setLoading(false);
             toast.error('Failed to fetch orders');
             console.error('Failed to fetch orders:', error);
         }
@@ -78,9 +79,9 @@ const MyOrders = () => {
                                 <p className="font-medium my-auto">{currency}{order.amount}</p>
                                 <div>
                                     <p className="flex flex-col">
-                                        <span>Method : COD</span>
+                                        <span>Method : {order.paymentType}</span>
                                         <span>Date : {new Date(order.date).toLocaleDateString()}</span>
-                                        <span>Payment : Pending</span>
+                                        <span>Payment : {order.isPaid ? 'Paid' : 'Pending'}</span>
                                     </p>
                                 </div>
                             </div>
