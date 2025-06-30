@@ -16,6 +16,7 @@ const AddProduct = () => {
   const [category, setCategory] = useState('Earphone');
   const [price, setPrice] = useState('');
   const [offerPrice, setOfferPrice] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (!isSeller) {
@@ -26,6 +27,11 @@ const AddProduct = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (isLoading) return; // Prevenir múltiples envíos
+    
+    setIsLoading(true);
+    
     const formData = new FormData();
     formData.append('name', name);
     formData.append('description', description);
@@ -37,6 +43,7 @@ const AddProduct = () => {
 
     if (validFiles.length === 0) {
       toast.error('Please upload at least one image.');
+      setIsLoading(false);
       return;
     }
 
@@ -64,9 +71,9 @@ const AddProduct = () => {
     } catch (error) {
       console.error('Error adding product:', error);
       toast.error(error.message);
+    } finally {
+      setIsLoading(false);
     }
-
-
   };
 
   return (
@@ -176,8 +183,16 @@ const AddProduct = () => {
             />
           </div>
         </div>
-        <button type="submit" className="px-8 py-2.5 bg-orange-600 text-white font-medium rounded">
-          ADD
+        <button 
+          type="submit" 
+          disabled={isLoading}
+          className={`px-8 py-2.5 text-white font-medium rounded ${
+            isLoading 
+              ? 'bg-gray-400 cursor-not-allowed' 
+              : 'bg-orange-600 hover:bg-orange-700'
+          }`}
+        >
+          {isLoading ? 'ADDING...' : 'ADD'}
         </button>
       </form>
     </div>
