@@ -31,13 +31,14 @@ export async function POST(request) {
             return await acc + product.offerPrice * item.quantity;
         }, 0);
 
-        amount += Math.floor(amount * 0.036);
+        // Calculate total with tax (tax will be added as separate line item in Stripe)
+        const totalWithTax = amount + Math.floor(amount * 0.036);
 
         const order = await Order.create({
             userId,
             address,
             items,
-            amount,
+            amount: totalWithTax,
             date: Date.now(),
             paymentType: 'Stripe'
         });
@@ -46,7 +47,7 @@ export async function POST(request) {
         const line_items = productData.map(item => {
             return {
                 price_data: {
-                    currency: 'usd',
+                    currency: 'mxn',
                     product_data: {
                         name: item.name
                     },
@@ -54,6 +55,18 @@ export async function POST(request) {
                 },
                 quantity: item.quantity
             };
+        });
+
+        const taxAmount = Math.floor(amount * 0.036);
+        line_items.push({
+            price_data: {
+                currency: 'mxn',
+                product_data: {
+                    name: 'Tax (3.6%)'
+                },
+                unit_amount: taxAmount * 100,
+            },
+            quantity: 1
         });
 
         // create session with Stripe
