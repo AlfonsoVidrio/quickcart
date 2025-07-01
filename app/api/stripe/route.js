@@ -1,6 +1,7 @@
 import connectDB from '@/config/db';
 import Order from '@/models/Order';
 import User from '@/models/User';
+import Product from '@/models/Product';
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
@@ -36,9 +37,19 @@ export async function POST(request) {
                 await connectDB();
 
                 if (isPaid) {
+                    const order = await Order.findById(orderId);
+                    if (order) {
+                        // Update stock for each product in the order
+                        for (const item of order.items) {
+                            await Product.findByIdAndUpdate(
+                                item.product, 
+                                { $inc: { stock: -item.quantity } }
+                            );
+                        }
+                    }
                     await Order.findByIdAndUpdate(orderId, { isPaid: true });
                     await User.findByIdAndUpdate(userId, { cartItems: {} });
-                    console.log(`Order ${orderId} marked as paid`);
+                    console.log(`Order ${orderId} marked as paid and stock updated`);
                 } else {
                     await Order.findByIdAndDelete(orderId);
                     console.log(`Order ${orderId} deleted due to failed payment`);
