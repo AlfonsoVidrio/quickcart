@@ -13,9 +13,16 @@ export async function POST(request) {
         const { address, items } = await request.json();
         const origin = request.headers.get('origin');
 
-        if (!address || items.length === 0) {
-            return NextResponse.json({ success: false, message: 'Address and items are required' }, { status: 400 });
+        if (!address) {
+            return NextResponse.json({ success: false, message: 'Address is required' }, { status: 400 });
         }
+
+        console.log('items', items);
+        if (!items || items.length === 0) {
+            return NextResponse.json({ success: false, message: 'No items in cart' }, { status: 400 });
+        }
+
+
 
         await connectDB();
 
