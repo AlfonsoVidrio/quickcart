@@ -64,14 +64,33 @@ export const AppContextProvider = (props) => {
     };
 
     const addToCart = async (itemId) => {
+        const product = products.find(p => p._id === itemId);
+        
+        if (!product) {
+            toast.error('Product not found');
+            return;
+        }
+
+        if (!product.stock || product.stock <= 0) {
+            toast.error('Product is out of stock');
+            return;
+        }
+
         const MAX_CART_ITEMS = 10;
         let cartData = structuredClone(cartItems);
+        const currentQuantity = cartData[itemId] || 0;
+
+        if (currentQuantity >= product.stock) {
+            toast.error(`Only ${product.stock} items available in stock`);
+            return;
+        }
+
+        if (currentQuantity >= MAX_CART_ITEMS) {
+            toast.error(`You can only add up to ${MAX_CART_ITEMS} of this item.`);
+            return;
+        }
 
         if (cartData[itemId]) {
-            if (cartData[itemId] >= MAX_CART_ITEMS) {
-                toast.error(`You can only add up to ${MAX_CART_ITEMS} of this item.`);
-                return;
-            }
             cartData[itemId] += 1;
             toast.success(`Item added to cart (${cartData[itemId]})`);
         } else {
@@ -94,16 +113,20 @@ export const AppContextProvider = (props) => {
     };
 
     const updateCartQuantity = async (itemId, quantity) => {
+        const product = products.find(p => p._id === itemId);
         let cartData = structuredClone(cartItems);
 
         if (quantity < 0) {
             delete cartData[itemId];
             toast.success('Item removed from cart');
-        }
-
-        else if (quantity === 0) {
-            cartData[itemId] = 1;
+        } else if (quantity === 0) {
+            delete cartData[itemId];
+            toast.success('Item removed from cart');
         } else {
+            if (product && quantity > product.stock) {
+                toast.error(`Only ${product.stock} items available in stock`);
+                return;
+            }
             cartData[itemId] = quantity;
         }
 
