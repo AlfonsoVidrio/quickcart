@@ -1,5 +1,7 @@
+import { assets } from '@/assets/assets';
 import { useAppContext } from '@/context/AppContext';
 import axios from 'axios';
+import Image from 'next/image';
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
@@ -9,8 +11,11 @@ const OrderSummary = () => {
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isPlaceOrderClicked, setIsPlaceOrderClicked] = useState(false);
 
   const [userAddresses, setUserAddresses] = useState([]);
+
+  const hasCartItems = getCartCount() > 0;
 
   const fetchUserAddresses = async () => {
     try {
@@ -37,9 +42,9 @@ const OrderSummary = () => {
 
   const createOrder = async () => {
     if (isLoading) return;
-    
+
     try {
-      
+
       if (!selectedAddress || !selectedAddress._id) {
         toast.error('Please select a valid address');
         return;
@@ -83,9 +88,9 @@ const OrderSummary = () => {
 
   const createOrderStripe = async () => {
     if (isLoading) return;
-    
+
     try {
-      
+
       if (!selectedAddress || !selectedAddress._id) {
         return toast.error('Please select a valid address');
       }
@@ -129,6 +134,26 @@ const OrderSummary = () => {
       fetchUserAddresses();
     }
   }, [user]);
+
+  if (!hasCartItems) {
+    return (
+      <div className="w-full md:w-96 bg-gray-500/5 p-5">
+        <h2 className="text-xl md:text-2xl font-medium text-gray-700">
+          Order Summary
+        </h2>
+        <hr className="border-gray-500/30 my-5" />
+        <div className="text-center py-8">
+          <p className="text-gray-500">Your cart is empty</p>
+          <button 
+            onClick={() => router.push('/all-products')}
+            className="mt-4 px-6 py-2 bg-orange-600 text-white rounded hover:bg-orange-700"
+          >
+            Continue Shopping
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full md:w-96 bg-gray-500/5 p-5">
@@ -180,22 +205,6 @@ const OrderSummary = () => {
           </div>
         </div>
 
-        <div>
-          <label className="text-base font-medium uppercase text-gray-600 block mb-2">
-            Promo Code
-          </label>
-          <div className="flex flex-col items-start gap-3">
-            <input
-              type="text"
-              placeholder="Enter promo code"
-              className="flex-grow w-full outline-none p-2.5 text-gray-600 border"
-            />
-            <button className="bg-orange-600 text-white px-9 py-2 hover:bg-orange-700">
-              Apply
-            </button>
-          </div>
-        </div>
-
         <hr className="border-gray-500/30 my-5" />
 
         <div className="space-y-4">
@@ -215,20 +224,37 @@ const OrderSummary = () => {
             <p>Total</p>
             <p>{currency}{getCartAmount() + Math.floor(getCartAmount() * 0.036)}</p>
           </div>
+
         </div>
       </div>
 
-      <button 
-        onClick={createOrderStripe} 
-        disabled={isLoading}
-        className={`w-full py-3 mt-5 text-white font-medium ${
-          isLoading 
-            ? 'bg-gray-400 cursor-not-allowed' 
-            : 'bg-orange-600 hover:bg-orange-700'
-        }`}
-      >
-        {isLoading ? 'Processing...' : 'Place Order'}
-      </button>
+      {
+        !isPlaceOrderClicked ? (
+          <button
+            onClick={() => setIsPlaceOrderClicked(true)}
+            className={'w-full py-2 mt-5 text-white font-medium bg-orange-600 hover:bg-orange-700'}
+          >
+            Place Order
+          </button>) : (
+          <div className="flex gap-2">
+            <button
+              onClick={createOrder}
+              disabled={isLoading}
+              className={`w-full py-2 mt-5 text-white font-medium ${isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-orange-600 hover:bg-orange-700'}`}
+            >
+              {isLoading ? 'Processing...' : 'Cash On Delivery'}
+            </button>
+            <button
+              onClick={createOrderStripe}
+              disabled={isLoading}
+              className={`w-full py-2 mt-5 flex justify-center items-center border border-indigo-500 ${isLoading ? 'bg-gray-100 cursor-not-allowed' : 'bg-white hover:bg-gray-50'}`}
+            >
+              <Image className="w-12" src={assets.stripe_logo} alt="Stripe" />
+            </button>
+
+          </div>
+        )
+      }
     </div>
   );
 };
