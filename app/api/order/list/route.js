@@ -8,8 +8,9 @@ export async function GET(request) {
         const { userId } = getAuth(request);
 
         await connectDB();
-
-        const orders = await Order.find({userId}).populate('address items.product');
+        
+        // Find all orders for the user that are either COD or paid Stripe orders, including address and product details
+        const orders = await Order.find({userId, $or: [{ paymentType: 'COD' }, { paymentType: 'Stripe', isPaid: true}]}).populate('address items.product');
 
         return NextResponse.json({ success: true, orders }, { status: 200 });
     } catch (error) {
