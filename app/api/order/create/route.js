@@ -17,12 +17,31 @@ export async function POST(request) {
 
         await connectDB();
 
-        let amount = await items.reduce(async (acc, item) => {
+        // Validate stock and calculate amount
+        let amount = 0;
+        for (const item of items) {
             const product = await Product.findById(item.product);
-            return await acc + product.offerPrice * item.quantity;
-        }, 0);
+            if (!product) {
+                return NextResponse.json({ success: false, message: `Product not found: ${item.product}` }, { status: 404 });
+            }
+            if (product.stock < item.quantity) {
+                return NextResponse.json({ 
+                    success: false, 
+                    message: `Insufficient stock for ${product.name}. Available: ${product.stock}, Required: ${item.quantity}` 
+                }, { status: 400 });
+            }
+            amount += product.offerPrice * item.quantity;
+        }
 
         amount += Math.floor(amount * 0.036);
+
+        // Update stock for each product
+        for (const item of items) {
+            await Product.findByIdAndUpdate(
+                item.product, 
+                { $inc: { stock: -item.quantity } }
+            );
+        }
 
         const newOrder = await Order.create({
             userId,
