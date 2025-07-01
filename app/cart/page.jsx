@@ -85,8 +85,19 @@ const Cart = () => {
                               className="w-4 h-4"
                             />
                           </button>
-                          <input onChange={e => updateCartQuantity(product._id, Number(e.target.value))} type="number" value={cartItems[itemId]} className="w-8 border text-center appearance-none"></input>
-                          <button onClick={() => addToCart(product._id)}>
+                          <input 
+                            onChange={e => updateCartQuantity(product._id, Number(e.target.value))} 
+                            type="number" 
+                            value={cartItems[itemId]} 
+                            min="1" 
+                            max={product.stock}
+                            className="w-8 border text-center appearance-none"
+                          /><span className="text-xs text-gray-500 ml-2">/{product.stock}</span>
+                          <button 
+                            onClick={() => addToCart(product._id)}
+                            disabled={cartItems[itemId] >= product.stock}
+                            className={cartItems[itemId] >= product.stock ? 'opacity-50 cursor-not-allowed' : ''}
+                          >
                             <Image
                               src={assets.increase_arrow}
                               alt="increase_arrow"
