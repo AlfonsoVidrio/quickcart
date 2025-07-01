@@ -27,16 +27,27 @@ export async function POST(request) {
         await connectDB();
 
         let productData = [];
+        let amount = 0;
 
-        let amount = await items.reduce(async (acc, item) => {
+        // Validate stock and prepare product data
+        for (const item of items) {
             const product = await Product.findById(item.product);
+            if (!product) {
+                return NextResponse.json({ success: false, message: `Product not found: ${item.product}` }, { status: 404 });
+            }
+            if (product.stock < item.quantity) {
+                return NextResponse.json({ 
+                    success: false, 
+                    message: `Insufficient stock for ${product.name}. Available: ${product.stock}, Required: ${item.quantity}` 
+                }, { status: 400 });
+            }
             productData.push({
                 name: product.name,
                 price: product.offerPrice,
                 quantity: item.quantity,
             });
-            return await acc + product.offerPrice * item.quantity;
-        }, 0);
+            amount += product.offerPrice * item.quantity;
+        }
 
         // Calculate total with tax (tax will be added as separate line item in Stripe)
         const totalWithTax = amount + Math.floor(amount * 0.036);
