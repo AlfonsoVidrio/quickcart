@@ -16,6 +16,7 @@ const AddProduct = () => {
   const [category, setCategory] = useState('Earphone');
   const [price, setPrice] = useState('');
   const [offerPrice, setOfferPrice] = useState('');
+  const [stock, setStock] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -38,6 +39,7 @@ const AddProduct = () => {
     formData.append('category', category);
     formData.append('price', price);
     formData.append('offerPrice', offerPrice);
+    formData.append('stock', stock);
 
     const validFiles = files.filter(file => file !== null && file !== undefined);
 
@@ -64,6 +66,7 @@ const AddProduct = () => {
         setCategory('Earphone');
         setPrice('');
         setOfferPrice('');
+        setStock('');
       } else {
         console.log('Error adding product:', data.message);
         toast.error(data.message);
@@ -179,6 +182,21 @@ const AddProduct = () => {
               className="outline-none md:py-2.5 py-2 px-3 rounded border border-gray-500/40"
               onChange={(e) => setOfferPrice(e.target.value)}
               value={offerPrice}
+              required
+            />
+          </div>
+          <div className="flex flex-col gap-1 w-32">
+            <label className="text-base font-medium" htmlFor="stock">
+              Stock Quantity
+            </label>
+            <input
+              id="stock"
+              type="number"
+              placeholder="0"
+              min="0"
+              className="outline-none md:py-2.5 py-2 px-3 rounded border border-gray-500/40"
+              onChange={(e) => setStock(e.target.value)}
+              value={stock}
               required
             />
           </div>
