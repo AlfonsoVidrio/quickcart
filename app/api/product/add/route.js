@@ -31,6 +31,42 @@ export async function POST(request) {
         const offerPrice = formData.get('offerPrice');
         const stock = formData.get('stock');
 
+        // Validate stock is a positive integer
+        const stockNumber = Number(stock);
+        if (!Number.isInteger(stockNumber) || stockNumber < 0) {
+            return NextResponse.json({ 
+                success: false, 
+                message: 'Stock must be a non-negative whole number' 
+            }, { status: 400 });
+        }
+
+        // Validate price is a positive number
+        const priceNumber = Number(price);
+        if (priceNumber <= 0) {
+            return NextResponse.json({ 
+                success: false, 
+                message: 'Price must be a positive number' 
+            }, { status: 400 });
+        }
+
+        // Validate offer price if provided
+        let offerPriceNumber = null;
+        if (offerPrice && offerPrice.trim() !== '') {
+            offerPriceNumber = Number(offerPrice);
+            if (offerPriceNumber <= 0) {
+                return NextResponse.json({ 
+                    success: false, 
+                    message: 'Offer price must be a positive number' 
+                }, { status: 400 });
+            }
+            if (offerPriceNumber > priceNumber) {
+                return NextResponse.json({ 
+                    success: false, 
+                    message: 'Offer price cannot be greater than regular price' 
+                }, { status: 400 });
+            }
+        }
+
 
         const files = formData.getAll('images');
 
@@ -69,9 +105,9 @@ export async function POST(request) {
             name,
             description,
             category,
-            price: Number(price),
-            offerPrice: Number(offerPrice),
-            stock: Number(stock),
+            price: priceNumber,
+            offerPrice: offerPriceNumber,
+            stock: stockNumber,
             images,
             date: Date.now()
         });
