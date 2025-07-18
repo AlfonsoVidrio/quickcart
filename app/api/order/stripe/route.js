@@ -10,6 +10,14 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 export async function POST(request) {
     try {
         const { userId } = getAuth(request);
+        
+        if (!userId) {
+            return NextResponse.json({ 
+                success: false, 
+                message: 'You must be logged in to place an order' 
+            }, { status: 401 });
+        }
+
         const { address, items } = await request.json();
         const origin = request.headers.get('origin');
 
@@ -31,6 +39,14 @@ export async function POST(request) {
 
         // Validate stock and prepare product data
         for (const item of items) {
+            // Validate quantity is a positive integer
+            if (!Number.isInteger(item.quantity) || item.quantity < 1) {
+                return NextResponse.json({ 
+                    success: false, 
+                    message: `Invalid quantity for product ${item.product}. Quantity must be a positive whole number.` 
+                }, { status: 400 });
+            }
+
             const product = await Product.findById(item.product);
             if (!product) {
                 return NextResponse.json({ success: false, message: `Product not found: ${item.product}` }, { status: 404 });
@@ -43,10 +59,10 @@ export async function POST(request) {
             }
             productData.push({
                 name: product.name,
-                price: product.offerPrice,
+                price: product.offerPrice || product.price,
                 quantity: item.quantity,
             });
-            amount += product.offerPrice * item.quantity;
+            amount += (product.offerPrice || product.price) * item.quantity;
         }
 
         // Calculate total with tax (tax will be added as separate line item in Stripe)
