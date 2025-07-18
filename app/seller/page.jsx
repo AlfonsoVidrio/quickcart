@@ -73,7 +73,12 @@ const AddProduct = () => {
       }
     } catch (error) {
       console.error('Error adding product:', error);
-      toast.error(error.message);
+      
+      if (error.response && error.response.data && error.response.data.message) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error('Failed to add product. Please try again.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -173,7 +178,7 @@ const AddProduct = () => {
           </div>
           <div className="flex flex-col gap-1 w-32">
             <label className="text-base font-medium" htmlFor="offer-price">
-              Offer Price
+              Offer Price (Optional)
             </label>
             <input
               id="offer-price"
@@ -182,7 +187,6 @@ const AddProduct = () => {
               className="outline-none md:py-2.5 py-2 px-3 rounded border border-gray-500/40"
               onChange={(e) => setOfferPrice(e.target.value)}
               value={offerPrice}
-              required
             />
           </div>
           <div className="flex flex-col gap-1 w-32">
@@ -194,8 +198,16 @@ const AddProduct = () => {
               type="number"
               placeholder="0"
               min="0"
+              step="1"
               className="outline-none md:py-2.5 py-2 px-3 rounded border border-gray-500/40"
-              onChange={(e) => setStock(e.target.value)}
+              onChange={(e) => {
+                const value = parseInt(e.target.value);
+                if (!isNaN(value) && value >= 0) {
+                  setStock(value.toString());
+                } else if (e.target.value === '') {
+                  setStock('');
+                }
+              }}
               value={stock}
               required
             />
