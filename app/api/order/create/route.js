@@ -9,6 +9,14 @@ import { NextResponse } from 'next/server';
 export async function POST(request) {
     try {
         const { userId } = getAuth(request);
+        
+        if (!userId) {
+            return NextResponse.json({ 
+                success: false, 
+                message: 'You must be logged in to place an order' 
+            }, { status: 401 });
+        }
+
         const { address, items } = await request.json();
 
         if (!address || items.length === 0) {
@@ -20,6 +28,14 @@ export async function POST(request) {
         // Validate stock and calculate amount
         let amount = 0;
         for (const item of items) {
+            // Validate quantity is a positive integer
+            if (!Number.isInteger(item.quantity) || item.quantity < 1) {
+                return NextResponse.json({ 
+                    success: false, 
+                    message: `Invalid quantity for product ${item.product}. Quantity must be a positive whole number.` 
+                }, { status: 400 });
+            }
+
             const product = await Product.findById(item.product);
             if (!product) {
                 return NextResponse.json({ success: false, message: `Product not found: ${item.product}` }, { status: 404 });
@@ -30,7 +46,7 @@ export async function POST(request) {
                     message: `Insufficient stock for ${product.name}. Available: ${product.stock}, Required: ${item.quantity}` 
                 }, { status: 400 });
             }
-            amount += product.offerPrice * item.quantity;
+            amount += (product.offerPrice || product.price) * item.quantity;
         }
 
         amount += Math.floor(amount * 0.036);
