@@ -4,7 +4,17 @@ const orderSchema = new mongoose.Schema({
     userId: { type: String, required: true },
     items:[{
         product: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'Product' },
-        quantity: { type: Number, required: true}
+        quantity: { 
+            type: Number, 
+            required: true,
+            min: 1,
+            validate: {
+                validator: function(value) {
+                    return Number.isInteger(value);
+                },
+                message: 'Quantity must be a whole number'
+            }
+        }
     }],
     amount: { type: Number, required: true },
     address: { type: mongoose.Schema.Types.ObjectId, ref: 'Address', required: true},
