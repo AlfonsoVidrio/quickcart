@@ -6,6 +6,13 @@ import { NextResponse } from 'next/server';
 export async function POST(request) {
     try {
         const { userId } = getAuth(request);
+        if (!userId) {
+            return NextResponse.json({ 
+                success: false, 
+                message: 'You must be logged in to add an address' 
+            }, { status: 401 });
+        }
+
         const { address } = await request.json();
 
         await connectDB();
