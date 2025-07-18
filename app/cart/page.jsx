@@ -75,7 +75,7 @@ const Cart = () => {
                           </button>
                         </div>
                       </td>
-                      <td className="py-4 md:px-4 px-1 text-gray-600">${product.offerPrice}</td>
+                      <td className="py-4 md:px-4 px-1 text-gray-600">${product.offerPrice || product.price}</td>
                       <td className="py-4 md:px-4 px-1">
                         <div className="flex items-center md:gap-2 gap-1">
                           <button onClick={() => updateCartQuantity(product._id, cartItems[itemId] - 1)}>
@@ -86,11 +86,17 @@ const Cart = () => {
                             />
                           </button>
                           <input 
-                            onChange={e => updateCartQuantity(product._id, Number(e.target.value))} 
+                            onChange={e => {
+                              const value = parseInt(e.target.value);
+                              if (!isNaN(value) && value >= 1 && value <= product.stock) {
+                                updateCartQuantity(product._id, value);
+                              }
+                            }}
                             type="number" 
                             value={cartItems[itemId]} 
                             min="1" 
                             max={product.stock}
+                            step="1"
                             className="w-8 border text-center appearance-none"
                           /><span className="text-xs text-gray-500 ml-2">/{product.stock}</span>
                           <button 
@@ -106,7 +112,7 @@ const Cart = () => {
                           </button>
                         </div>
                       </td>
-                      <td className="py-4 md:px-4 px-1 text-gray-600">${(product.offerPrice * cartItems[itemId]).toFixed(2)}</td>
+                      <td className="py-4 md:px-4 px-1 text-gray-600">${((product.offerPrice || product.price) * cartItems[itemId]).toFixed(2)}</td>
                     </tr>
                   );
                 })}
