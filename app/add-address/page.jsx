@@ -49,7 +49,14 @@ const AddAddress = () => {
             }
         } catch (error) {
             console.error('Error adding address:', error);
-            toast.error('Failed to add address');
+            
+            if (error.response && error.response.data && error.response.data.message) {
+                toast.error(error.response.data.message);
+            } else if (error.response && error.response.status === 401) {
+                toast.error('You must be logged in to add an address');
+            } else {
+                toast.error('Failed to add address. Please try again.');
+            }
         } finally {
             setIsLoading(false);
         }
